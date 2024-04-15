@@ -1,0 +1,12 @@
+appId: com.grantanderson.open-asset-publisher
+productName: Open Asset Publisher
+copyright: Copyright © 2024 Grant Anderson
+directories:
+    output: dist
+    buildResources: resources
+files:
+    - from: .
+      filter:
+          - package.json
+          - app
+publish: null
