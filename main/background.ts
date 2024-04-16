@@ -1,5 +1,5 @@
 import path from 'path'
-import { app, dialog, ipcMain, shell } from 'electron'
+import { Menu, app, dialog, ipcMain, shell } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { FileType } from './helpers/types'
@@ -28,11 +28,8 @@ if (isProd) {
 		},
 	})
 
-	if (isProd) {
-		await mainWindow.loadURL(`${BaseURL}/home`)
-	} else {
-		const port = process.argv[2]
-		await mainWindow.loadURL(`${BaseURL}/home`)
+	await mainWindow.loadURL(`${BaseURL}/`)
+	if (!isProd) {
 		mainWindow.webContents.openDevTools()
 	}
 })()
