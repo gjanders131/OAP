@@ -4,12 +4,19 @@
 
 @layer base {
 	body {
-		@apply bg-gray-900 text-white;
+		@apply bg-gray-900 text-white font-light;
+	}
+	@font-face {
+		font-family: 'Inconsolata';
+		font-style: normal;
+		/* font-weight: 300; */
+		src: url(../public/fonts/Inconsolata-VariableFont.ttf)
+			format('truetype');
 	}
 }
 
 @layer components {
-	.btn-blue {
-		@apply text-white font-bold px-4 py-2 rounded bg-blue-600 hover:bg-blue-500;
+	.btn-large {
+		@apply p-3 border-2 m-2 border-oap-200 rounded-lg bg-oap-900 text-3xl text-oap-200 hover:bg-oap-400 hover:text-oap-950 hover:font-medium;
 	}
 }

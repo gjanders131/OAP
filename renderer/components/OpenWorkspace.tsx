@@ -1,21 +1,26 @@
 import { FileType } from '../../main/helpers/types'
+import { useRouter } from 'next/navigation'
 
 const OpenWorkspace = () => {
+	const router = useRouter()
 	return (
-		<div>
-			<button
-				onClick={() => {
-					window.api.OpenFile().then((res: FileType) => {
-						window.api.SetWorkspace(res)
+		<button
+			className='btn-large'
+			onClick={() => {
+				window.api
+					.OpenFile()
+					.then((res: { file: FileType; canceled: Boolean }) => {
+						if (res.canceled) return
+						window.api.SetWorkspace(res.file)
 						window.api.GetWorkspace().then((res: FileType) => {
-							console.log(res.fileName)
+							router.push('/asset-browser')
+							return
 						})
 					})
-				}}
-			>
-				Open Workspace
-			</button>
-		</div>
+			}}
+		>
+			Open Workspace
+		</button>
 	)
 }
 

@@ -55,6 +55,8 @@ ipcMain.handle('dialog:openDir', async () => {
 	})
 	if (!canceled) {
 		return filePaths[0]
+	} else {
+		return canceled
 	}
 })
 
@@ -72,9 +74,9 @@ ipcMain.handle('dialog:openFile', async () => {
 			fileName: path.basename(filePaths[0]),
 			ext: path.extname(filePaths[0]),
 		}
-		return file
+		return { file, canceled }
 	} else {
-		return ''
+		return { undefined, canceled }
 	}
 })
 
