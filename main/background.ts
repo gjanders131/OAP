@@ -1,5 +1,5 @@
 import path from 'path'
-import { Menu, app, dialog, ipcMain, shell } from 'electron'
+import { Menu, app, dialog, ipcMain, session, shell } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { FileType } from './helpers/types'
@@ -11,19 +11,18 @@ let BaseURL: string = isProd ? 'app://.' : `http://localhost:${port}`
 let Workspace: FileType
 
 if (isProd) {
-	serve({ directory: 'app' })
+	serve({ directory: 'build' })
 } else {
 	app.setPath('userData', `${app.getPath('userData')} (development)`)
 }
 
 ;(async () => {
 	await app.whenReady()
-
 	const mainWindow = createWindow('main', {
 		width: 1000,
 		height: 600,
 		webPreferences: {
-			sandbox: true,
+			// sandbox: true,
 			preload: path.join(__dirname, 'preload.js'),
 		},
 	})
@@ -93,6 +92,16 @@ ipcMain.handle('api:GetWorkspace', async (event, arg) => {
 	return Workspace
 })
 
+ipcMain.handle('api:GetUserSettings', async (event, arg) => {
+	let path: string = app.getPath('userData')
+	fs.stat(`${path}/settings.json`, (err, stats) => {
+		if (err) {
+			fs.writeFileSync(`${path}/settings.json`, JSON.stringify({}))
+		}
+	})
+	return `${path}/settings.json`
+})
+
 // Shell
 ipcMain.handle('shell:ShowInFolder', async (event, arg) => {
 	shell.showItemInFolder(arg)
@@ -134,4 +143,9 @@ ipcMain.handle('fs:WriteFile', async (event, arg) => {
 ipcMain.handle('fs:ReadFile', async (event, arg) => {
 	const path: string = arg[0]
 	return fs.readFileSync(path, 'utf-8')
+})
+
+ipcMain.handle('fs:CheckIsDir', async (event, arg) => {
+	const stats = fs.statSync(arg)
+	return stats.isDirectory()
 })

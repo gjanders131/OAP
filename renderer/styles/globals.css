@@ -17,6 +17,6 @@
 
 @layer components {
 	.btn-large {
-		@apply p-3 border-2 m-2 border-oap-200 rounded-lg bg-oap-900 text-3xl text-oap-200 hover:bg-oap-400 hover:text-oap-950 hover:font-medium;
+		@apply p-3 border-2 m-2 border-oap-200 rounded-md bg-oap-900 text-3xl text-oap-200 hover:bg-oap-400 hover:text-oap-950 hover:font-medium;
 	}
 }

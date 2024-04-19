@@ -34,6 +34,7 @@ const apiHandler = {
 	SetWorkspace: (workspace: FileType) =>
 		ipcRenderer.invoke('api:SetWorkspace', workspace),
 	GetWorkspace: () => ipcRenderer.invoke('api:GetWorkspace'),
+	GetUserSettings: () => ipcRenderer.invoke('api:GetUserSettings'),
 }
 contextBridge.exposeInMainWorld('api', apiHandler)
 
@@ -43,6 +44,7 @@ const fsHandler = {
 	WriteFile: (newFile: FileType, options: WriteFileOptions) =>
 		ipcRenderer.invoke('fs:WriteFile', newFile, options),
 	ReadFile: (path: string) => ipcRenderer.invoke('fs:ReadFile', path),
+	CheckIsDir: (path: string) => ipcRenderer.invoke('fs:CheckIsDir', path),
 }
 contextBridge.exposeInMainWorld('fs', fsHandler)
 
@@ -60,12 +62,15 @@ contextBridge.exposeInMainWorld('window', {
 })
 
 // Version Info
-contextBridge.exposeInMainWorld('versions', {
+const versions = {
 	node: () => process.versions.node,
 	chrome: () => process.versions.chrome,
 	electron: () => process.versions.electron,
-})
+}
+
+contextBridge.exposeInMainWorld('versions', versions)
 
 export type IpcHandler = typeof handler
 export type APIHandler = typeof apiHandler
 export type FS = typeof fsHandler
+export type Versions = typeof versions

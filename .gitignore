@@ -4,6 +4,8 @@ node_modules
 .next
 app
 dist
+build
+.DS_Store
 
 #Allow
 !renderer/app
