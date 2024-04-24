@@ -1,4 +1,4 @@
-import { FileType } from '../../main/helpers/types'
+import { FileType } from './helpers/types'
 
 const CreateWorkspace = () => {
 	return (
@@ -9,11 +9,12 @@ const CreateWorkspace = () => {
 					const newFile: FileType = {
 						dirPath: res,
 						fileName: 'OAPworkspace',
-						ext: '.json',
-						content: '{Hello There}',
+						ext: '.OAPworkspace',
+						content: JSON.stringify({ WorkspaceName: 'MyProject' }),
 					}
 					window.fs.WriteFile(newFile).then((res) => {
 						console.log(res)
+						window.api.SetWorkspace(res)
 					})
 				})
 			}}

@@ -2,13 +2,22 @@ import path from 'path'
 import { Menu, app, dialog, ipcMain, session, shell } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
-import { FileType } from './helpers/types'
-import fs from 'fs'
+import { Asset, FilePaths, FileType } from './helpers/types'
+import fs, { Dirent } from 'fs'
 
 const isProd = process.env.NODE_ENV === 'production'
 let port = isProd ? 0 : process.argv[2]
 let BaseURL: string = isProd ? 'app://.' : `http://localhost:${port}`
-let Workspace: FileType
+
+const defualtWorkspace: FileType = {
+	fullPath:
+		'/Users/grantanderson/Dev/MyTestProject/OAPWorkspace.OAPworkspace',
+	dirPath: '/Users/grantanderson/Dev/MyTestProject/',
+	fileName: 'OAPWorkspace',
+	ext: '.OAPworkspace',
+}
+
+let Workspace: FileType = defualtWorkspace
 
 if (isProd) {
 	serve({ directory: 'build' })
@@ -27,7 +36,7 @@ if (isProd) {
 		},
 	})
 
-	await mainWindow.loadURL(`${BaseURL}/`)
+	await mainWindow.loadURL(`${BaseURL}/asset-browser`)
 	if (!isProd) {
 		mainWindow.webContents.openDevTools()
 	}
@@ -61,7 +70,7 @@ ipcMain.handle('dialog:openDir', async () => {
 
 ipcMain.handle('dialog:openFile', async () => {
 	const dialogOptions: Electron.OpenDialogOptions = {
-		filters: [{ name: 'JSON', extensions: ['json'] }],
+		filters: [{ name: 'OAPworkspace', extensions: ['OAPworkspace'] }],
 		properties: ['openFile'],
 		defaultPath: Workspace ? Workspace.dirPath : app.getPath('documents'),
 	}
@@ -102,6 +111,63 @@ ipcMain.handle('api:GetUserSettings', async (event, arg) => {
 	return `${path}/settings.json`
 })
 
+ipcMain.handle('api:GetAssets', async () => {
+	// Get files in workspace directory and filter out .DS_Store and .OAPworkspace
+	const files: Dirent[] = fs
+		.readdirSync(Workspace.dirPath, {
+			withFileTypes: true,
+			recursive: true,
+		})
+		.filter((file: Dirent) => {
+			if (
+				!file.name.includes('.DS_Store') &&
+				!file.name.includes('.OAPworkspace')
+			) {
+				return file
+			}
+		})
+
+	//TODO: Determine asset path by Schema, for now just return source path
+	const assets: Asset[] = []
+	files.map((file: Dirent) => {
+		let assetPath = ''
+		let assetName = ''
+		let assetChildren = { assetDirs: [], assetFiles: [] }
+
+		//TODO: Get Asset name and path based on Source, replace this with schema path
+		if (file.isDirectory()) {
+			if (file.name === 'Source') {
+				assetPath = file.path
+				const splitPath = file.path.split('/')
+				assetName = splitPath[splitPath.length - 1]
+			}
+		}
+		const asset: Asset = {
+			name: assetName,
+			dirPath: assetPath,
+			children: assetChildren,
+		}
+		if (asset.name !== '') {
+			assets.push(asset)
+		}
+	})
+	// Get children of asset based on path
+	assets.map((asset: Asset) => {
+		// if (!asset) return
+		files.map((file: Dirent) => {
+			if (file.path.includes(asset.dirPath)) {
+				if (file.isDirectory()) {
+					asset.children.assetDirs.push(file)
+				}
+				if (file.isFile()) {
+					asset.children.assetFiles.push(file)
+				}
+			}
+		})
+	})
+	return assets
+})
+
 // Shell
 ipcMain.handle('shell:ShowInFolder', async (event, arg) => {
 	shell.showItemInFolder(arg)
@@ -117,8 +183,30 @@ ipcMain.handle('shell:Beep', async () => {
 
 // File System
 ipcMain.handle('fs:GetFiles', async (event, arg) => {
-	const files = fs.readdirSync(arg, { withFileTypes: true, recursive: true })
-	return files
+	const filters: string[] = ['.OAPworkspace', '.DS_Store']
+	let filteredFiles: Dirent[] = []
+	let outputFiles: FilePaths = { dirs: [], files: [] }
+	let files: Dirent[] = fs.readdirSync(arg, {
+		withFileTypes: true,
+		recursive: true,
+	})
+	filteredFiles = files.filter((file, index) => {
+		if (
+			!file.name.includes('.DS_Store') &&
+			!file.name.includes('.OAPworkspace')
+		) {
+			return file
+		}
+	})
+	filteredFiles.map((file: Dirent) => {
+		if (file.isDirectory()) {
+			outputFiles.dirs.push(file)
+		}
+		if (file.isFile()) {
+			outputFiles.files.push(file)
+		}
+	})
+	return outputFiles
 })
 
 ipcMain.handle('fs:WriteFile', async (event, arg) => {
@@ -141,7 +229,7 @@ ipcMain.handle('fs:WriteFile', async (event, arg) => {
 })
 
 ipcMain.handle('fs:ReadFile', async (event, arg) => {
-	const path: string = arg[0]
+	const path: string = arg
 	return fs.readFileSync(path, 'utf-8')
 })
 

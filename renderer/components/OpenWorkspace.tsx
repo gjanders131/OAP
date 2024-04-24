@@ -1,4 +1,4 @@
-import { FileType } from '../../main/helpers/types'
+import { FileType } from './helpers/types'
 import { useRouter } from 'next/navigation'
 
 const OpenWorkspace = () => {

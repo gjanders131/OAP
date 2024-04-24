@@ -5,7 +5,7 @@ import {
 	MessageBoxOptions,
 } from 'electron'
 import { WriteFileOptions } from 'fs'
-import { FileType } from './helpers/types'
+import { FileType } from '../renderer/components/helpers/types'
 
 const handler = {
 	send(channel: string, value: unknown) {
@@ -35,6 +35,7 @@ const apiHandler = {
 		ipcRenderer.invoke('api:SetWorkspace', workspace),
 	GetWorkspace: () => ipcRenderer.invoke('api:GetWorkspace'),
 	GetUserSettings: () => ipcRenderer.invoke('api:GetUserSettings'),
+	GetAssets: () => ipcRenderer.invoke('api:GetAssets'),
 }
 contextBridge.exposeInMainWorld('api', apiHandler)
 
