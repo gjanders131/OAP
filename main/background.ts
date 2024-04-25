@@ -2,7 +2,11 @@ import path from 'path'
 import { Menu, app, dialog, ipcMain, session, shell } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
-import { Asset, FilePaths, FileType } from './helpers/types'
+import {
+	Asset,
+	FilePaths,
+	FileType,
+} from '../renderer/components/helpers/types'
 import fs, { Dirent } from 'fs'
 
 const isProd = process.env.NODE_ENV === 'production'

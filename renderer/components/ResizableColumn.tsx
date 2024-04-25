@@ -4,9 +4,20 @@ import { use, useContext, useEffect, useRef } from 'react'
 import { ColumnContext } from './helpers/Context'
 import { AssetColumnWidths } from './helpers/Store'
 
-const ResizableColumn = ({ content, index }) => {
-	const { columnWidths, setColumnWidth } = AssetColumnWidths((state) => state)
+type ResizableColumnProps = {
+	content?: string
+	children?: React.ReactNode
+	index: number
+}
+
+const ResizableColumn = ({
+	content,
+	children,
+	index,
+}: ResizableColumnProps) => {
 	const resizerRef = useRef(null)
+	let columnWidths = AssetColumnWidths((state) => state.columnWidths)
+	const setColumnWidth = AssetColumnWidths((state) => state.setColumnWidth)
 
 	useEffect(() => {
 		const resizer = resizerRef.current
@@ -21,9 +32,10 @@ const ResizableColumn = ({ content, index }) => {
 		const Resize = (event) => {
 			let splitArray = columnWidths.slice(0, index)
 			let sumOfArray = splitArray.reduce((a, b) => a + b, 0)
-
 			let newWidth = event.clientX - sumOfArray
 			setColumnWidth(index, newWidth)
+			columnWidths[index] = newWidth
+			console.log(columnWidths)
 		}
 		const StopResize = () => {
 			document.removeEventListener('mousemove', Resize)
@@ -38,14 +50,17 @@ const ResizableColumn = ({ content, index }) => {
 	return (
 		<div
 			style={{ width: columnWidths[index] }}
-			className='flex justify-between'
+			className='relative'
 		>
-			{content}
+			<div className='overflow-y-scroll mx-[10px] my-[5px]'>
+				{content}
+				{children}
+			</div>
 			<div
 				ref={resizerRef}
-				className='w-[10px] flex justify-center cursor-col-resize'
+				className='w-[10px] flex justify-center cursor-col-resize h-full absolute -right-[5px] top-0 z-50'
 			>
-				<div className='w-[1px] h-full bg-oap-50' />
+				<div className='w-[1px] h-full bg-oap-200' />
 			</div>
 		</div>
 	)

@@ -14,7 +14,10 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang='en'>
-			<body className='bg-oap-1000 absolute'>{children}</body>
+			<body className='bg-oap-1000 absolute'>
+				{/* <div className='h-[22px] w-screen bg-oap-900'></div> */}
+				<div className=''>{children}</div>
+			</body>
 		</html>
 	)
 }
